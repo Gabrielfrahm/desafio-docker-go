@@ -1,7 +1,11 @@
-FROM golang:1.14.6-alpine3.11
+FROM golang:1.19 AS build
+WORKDIR /app
+COPY . /app
+RUN CGO_ENABLED=0 GOOS=linux go build -o api hello.go
 
-WORKDIR /go/src
 
-COPY . .
-
-ENTRYPOINT [ "go", "run", "." ]
+FROM scratch
+WORKDIR /app
+COPY --from=build /app/api ./
+EXPOSE 8000
+CMD [ "./api" ]
